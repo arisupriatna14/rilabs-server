@@ -1,15 +1,35 @@
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
+require('dotenv').config();
+const reateError = require('http-errors');
+const express = require('express');
+const path = require('path');
+const cookieParser = require('cookie-parser');
+const logger = require('morgan');
+const mongoose = require('mongoose');
+const cors = require('cors')
 
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
+const indexRouter = require('./routes/index');
+const usersRouter = require('./routes/users');
 
-var app = express();
+const app = express();
+
+const DB_URL = {
+  development: process.env.MONGODB_URI,
+  test: process.env.MONGODB_TEST_URI
+}
+
+if (!process.env.NODE_ENV) {
+  process.env.NODE_ENV = 'development'
+}
+
+mongoose.connect(DB_URL[process.env.NODE_ENV], { useNewUrlParser: true  });
+const db = mongoose.connection
+db.on('error', console.error.bind(console, ('connection error')));
+db.once('open', () => {
+  console.log('Database connected');
+});
 
 // view engine setup
+app.use(cors())
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
